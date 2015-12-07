@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+	<!-- 控制台输出 -->
+	<appender name="console" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.out" />
+		<!--输出级别 -->
+		<param name="Threshold" value="debug" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %c - %m%n" />
+		</layout>
+		<!--限制输出级别 -->
+		<filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="LevelMax" value="ERROR" />
+			<param name="LevelMin" value="TRACE" />
+			<param name="AcceptOnMatch" value="true" />
+		</filter>
+	</appender>
+	  <!-- 系统应用级别日志 -->
+    <appender name="filelog_daily_erro" class="org.apache.log4j.RollingFileAppender">
+        <param name="threshold" value="error" />
+        <param name="file" value="/home/weblogic/logs/pm_logs/pmnew/pm_error.log" />
+        <param name="maxFileSize" value="1M" />
+        <param name="maxBackupIndex" value="5" />
+        <param name="append" value="true" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[%-5p][%d{yyyy-MM-dd HH:mm:ss,SSS}][%c] :%m%n" />
+        </layout>
+    </appender>
+	<!-- 输出到日志文件 每天一个日志 -->
+	<appender name="filelog_daily" class="org.apache.log4j.DailyRollingFileAppender">
+	  <param name="threshold" value="debug" />
+		<param name="File" value="/home/weblogic/logs/pm_logs/pmnew/pm.log" />
+		<param name="DatePattern" value="'daily.'yyyy-MM-dd'.log'" />
+		 <param name="append" value="true" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="[%d{yyyy-MM-dd HH:mm:ss\} %-5p] [%t] (%c:%L) - %m%n" />
+		</layout>
+	</appender>
+	<!-- 保存到文件,大小循环 -->
+	<appender name="file" class="org.apache.log4j.RollingFileAppender">
+		<param name="File" value="/home/weblogic/logs/pm_logs/pmnew/pm.log" />
+		<param name="MaxFileSize" value="100KB" />
+		<param name="MaxBackupIndex" value="2" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="=%d %-5p [%t] %-17c{2} (%13F:%L) %3x - %m%n" />
+		</layout>
+	</appender>
+	<!-- 保存到的数据库 -->
+	<!-- jdbcplus  数据库要使用连接池,不然的效率太低-->
+	<!-- 
+	<appender name="DATABASE_PLUS" class="org.apache.log4j.jdbcplus.JDBCAppender">
+		<param name="url" value="jdbc:mysql://127.0.0.1:3306/finalplatform" />
+		<param name="dbclass" value="com.mysql.jdbc.Driver" />
+		<param name="username" value="root" />
+		<param name="password" value="root" />
+		<param name="table" value="app_logs" />
+		<param name="column" value="class~IPRIO" />
+		<param name="column" value="stamp~TIMESTAMP" />
+		<param name="column" value="thread~THREAD" />
+		<param name="column" value="DEBUG_level~PRIO" />
+		<param name="column" value="message~MSG" />
+		<param name="buffer" value="1" />
+		<param name="usePreparedStatements" value="true" />
+		<param name="quoteReplace" value="false" />
+		<param name="throwableMaxChars" value="3000" />
+	</appender>
+ -->
+	<appender name="DATABASE" class="org.apache.log4j.jdbc.JDBCAppender">
+		<param name="URL" value="jdbc:mysql://127.0.0.1:3306/finalplatform" />
+		<param name="driver" value="com.mysql.jdbc.Driver" />
+		<param name="user" value="root" />
+		<param name="password" value="root" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern"
+				value="INSERT INTO app_logs(class,stamp,thread,DEBUG_level,message)VALUES('%c','%d','%t','%p','%m')" />
+		</layout>
+	</appender>
+
+	<!-- 发邮件（只有ERROR时才会发送！） -->
+<!-- 	<appender name="MAIL" class="org.apache.log4j.net.SMTPAppender">
+		<param name="threshold" value="DEBUG" />
+		日志的错误级别 <param name="threshold" value="fatal"/>
+		缓存文件大小，日志达到512K时发送Email
+		<param name="BufferSize" value="512" />单位K
+		<param name="From" value="test@163.com" />
+		<param name="SMTPHost" value="smtp.163.com" />
+		<param name="Subject" value="juyee-log4jMessage" />
+		<param name="To" value="test@163.com" />
+		<param name="SMTPUsername" value="test" />
+		<param name="SMTPPassword" value="test" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%-d{yyyy-MM-dd HH:mm:ss.SSS} [%p]-[%c] %m%n" />
+		</layout>
+	</appender> -->
+	<appender name="ASYNC" class="org.apache.log4j.AsyncAppender">
+		<param name="BufferSize" value="1" />
+		<appender-ref ref="DATABASE" />
+	</appender>
+	<!--通过<logger></logger>的定义可以将各个包中的类日志输出到不同的日志文件中 -->
+	<logger name="com.litt2.log4j" additivity="false">
+		<level value="WARN" />
+		<appender-ref ref="console" />
+	</logger>
+
+	<!--通过<category></category>的定义可以将各个包中的类日志输出到不同的日志文件中 -->
+	<category name="net.carefx" additivity="false">
+		<priority value="DEBUG" />
+		<appender-ref ref="console" />
+		<appender-ref ref="filelog_daily" />
+	</category>
+	<category name="org.springframework" additivity="false">
+		<priority value="DEBUG" />
+		<appender-ref ref="console" />
+		<appender-ref ref="filelog_daily" />
+	</category>
+	<category name="org.springframework.orm.ibatis3" additivity="false">
+		<priority value="DEBUG" />
+		<appender-ref ref="console" />
+		<appender-ref ref="filelog_daily" />
+	</category>
+	<category name="java.sql" additivity="false">
+		<priority value="DEBUG" />
+		<appender-ref ref="console" />
+		<appender-ref ref="filelog_daily" />
+	</category>
+	<category name="org.quartz" additivity="false">
+		<priority value="ERROR" />
+		<appender-ref ref="console" />
+		<appender-ref ref="filelog_daily" />
+	</category>
+	<category name="org.apache.ibatis" additivity="false">
+		<priority value="DEBUG" />
+		<appender-ref ref="console" />
+		<appender-ref ref="filelog_daily" />
+		<!-- 
+		<appender-ref ref="ASYNC" />
+		 -->
+	</category>
+	<!-- <logger name="org.apache.ibatis"> <level value="DEBUG" /> </logger> <logger name="org.apache.ibatis.common.jdbc.SimpleDataSource"> 
+		<level value="DEBUG" /> </logger> <logger name="org.apache.ibatis.common.jdbc.SimpleDataSource"> <level 
+		value="DEBUG" /> </logger> <logger name="org.apache.ibatis.common.jdbc.ScriptRunner"> <level value="DEBUG" 
+		/> </logger> <logger name="org.apache.ibatis.common.jdbc.SqlMapClientDelegate"> <level value="DEBUG" 
+		/> </logger> -->
+	<!-- <logger name="java.sql"> <level value="DEBUG" /> </logger> <logger name="java.sql.Connection"> 
+		<level value="DEBUG" /> </logger> <logger name="java.sql.Statement"> <level value="DEBUG" /> </logger> 
+		<logger name="java.sql.PreparedStatement"> <level value="DEBUG" /> </logger> <logger name="java.sql.ResultSet"> 
+		<level value="DEBUG" /> </logger> -->
+	<root>
+		<priority value="DEBUG" />
+		<appender-ref ref="console" />
+		<appender-ref ref="filelog_daily" />
+		<!-- <appender-ref ref="FILE" /> -->
+	</root>
+</log4j:configuration>

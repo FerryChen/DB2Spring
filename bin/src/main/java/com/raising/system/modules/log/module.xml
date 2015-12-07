@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module>
+	<plugin>yes</plugin>
+	<id>log</id>
+	<name>日志模块</name>
+	<desc>日志模块</desc>
+</module>
